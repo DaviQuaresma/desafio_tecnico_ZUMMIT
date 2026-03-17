@@ -1,0 +1,494 @@
+{
+	"info": {
+		"_postman_id": "travel-orders-api-collection",
+		"name": "Travel Orders API",
+		"description": "Microsserviço de Pedidos de Viagem Corporativa - API REST com autenticação JWT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "travel_order_id",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"description": "Endpoints de autenticação",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.data.token);",
+									"    console.log('Token salvo automaticamente!');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Usuário Teste\",\n    \"email\": \"teste@exemplo.com\",\n    \"password\": \"senha12345\",\n    \"password_confirmation\": \"senha12345\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "Registra um novo usuário e retorna o token JWT"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.data.token);",
+									"    console.log('Token salvo automaticamente!');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"teste@exemplo.com\",\n    \"password\": \"senha12345\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Realiza login e retorna o token JWT"
+					},
+					"response": []
+				},
+				{
+					"name": "Me (Perfil)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/me",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "me"]
+						},
+						"description": "Retorna os dados do usuário autenticado"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.data.token);",
+									"    console.log('Token atualizado automaticamente!');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/refresh",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "refresh"]
+						},
+						"description": "Atualiza o token JWT atual"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "logout"]
+						},
+						"description": "Invalida o token JWT atual"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Travel Orders",
+			"description": "Endpoints de pedidos de viagem",
+			"item": [
+				{
+					"name": "Listar Pedidos",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/travel-orders",
+							"host": ["{{base_url}}"],
+							"path": ["travel-orders"]
+						},
+						"description": "Lista todos os pedidos de viagem do usuário autenticado"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Pedidos (com filtros)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/travel-orders?status=requested&destination=Paulo&start_date=2026-04-01&end_date=2026-12-31&per_page=10",
+							"host": ["{{base_url}}"],
+							"path": ["travel-orders"],
+							"query": [
+								{
+									"key": "status",
+									"value": "requested",
+									"description": "Filtrar por status: requested, approved, canceled"
+								},
+								{
+									"key": "destination",
+									"value": "Paulo",
+									"description": "Filtrar por destino (busca parcial)"
+								},
+								{
+									"key": "start_date",
+									"value": "2026-04-01",
+									"description": "Data inicial do período de viagem"
+								},
+								{
+									"key": "end_date",
+									"value": "2026-12-31",
+									"description": "Data final do período de viagem"
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"description": "Itens por página (padrão: 15)"
+								}
+							]
+						},
+						"description": "Lista pedidos de viagem com filtros opcionais"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Pedido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('travel_order_id', jsonData.data.id);",
+									"    console.log('ID do pedido salvo: ' + jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"destination\": \"São Paulo, Brasil\",\n    \"departure_date\": \"2026-05-01\",\n    \"return_date\": \"2026-05-10\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/travel-orders",
+							"host": ["{{base_url}}"],
+							"path": ["travel-orders"]
+						},
+						"description": "Cria um novo pedido de viagem"
+					},
+					"response": []
+				},
+				{
+					"name": "Visualizar Pedido",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/travel-orders/{{travel_order_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["travel-orders", "{{travel_order_id}}"]
+						},
+						"description": "Retorna os detalhes de um pedido de viagem específico"
+					},
+					"response": []
+				},
+				{
+					"name": "Aprovar Pedido",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"approved\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/travel-orders/{{travel_order_id}}/status",
+							"host": ["{{base_url}}"],
+							"path": ["travel-orders", "{{travel_order_id}}", "status"]
+						},
+						"description": "Aprova um pedido de viagem (não pode ser seu próprio pedido)"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar Pedido (via status)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"canceled\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/travel-orders/{{travel_order_id}}/status",
+							"host": ["{{base_url}}"],
+							"path": ["travel-orders", "{{travel_order_id}}", "status"]
+						},
+						"description": "Cancela um pedido de viagem via atualização de status"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar Pedido (endpoint direto)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/travel-orders/{{travel_order_id}}/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["travel-orders", "{{travel_order_id}}", "cancel"]
+						},
+						"description": "Cancela um pedido de viagem (dono só pode cancelar se status for 'requested')"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
