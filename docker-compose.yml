@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Laravel com Apache
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: travel_orders_app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    environment:
+      - APACHE_RUN_USER=www-data
+      - APACHE_RUN_GROUP=www-data
+    depends_on:
+      - mysql
+    networks:
+      - travel_orders_network
+
+  # MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: travel_orders_mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: travel_orders
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - travel_orders_network
+
+networks:
+  travel_orders_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
