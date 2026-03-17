@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Enums\TravelOrderStatus;
 use App\Models\TravelOrder;
 use App\Models\User;
+use App\Notifications\TravelOrderApprovedNotification;
+use App\Notifications\TravelOrderCanceledNotification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -99,6 +101,9 @@ class TravelOrderService
 
         $travelOrder->approve();
 
+        $notification = $this->createApprovedNotification($travelOrder);
+        $travelOrder->user->notify($notification);
+
         return [
             'success' => true,
             'message' => 'Pedido de viagem aprovado com sucesso.',
@@ -139,7 +144,11 @@ class TravelOrderService
             ];
         }
 
+        $canceledByOwner = $travelOrder->belongsToUser($cancelerId);
         $travelOrder->cancel();
+
+        $notification = $this->createCanceledNotification($travelOrder, $canceledByOwner);
+        $travelOrder->user->notify($notification);
 
         return [
             'success' => true,
@@ -171,5 +180,15 @@ class TravelOrderService
             'message' => 'Status inválido. Use "approved" ou "canceled".',
             'code' => 422,
         ];
+    }
+
+    private function createApprovedNotification(TravelOrder $travelOrder): TravelOrderApprovedNotification
+    {
+        return new TravelOrderApprovedNotification($travelOrder);
+    }
+
+    private function createCanceledNotification(TravelOrder $travelOrder, bool $canceledByOwner): TravelOrderCanceledNotification
+    {
+        return new TravelOrderCanceledNotification($travelOrder, $canceledByOwner);
     }
 }
