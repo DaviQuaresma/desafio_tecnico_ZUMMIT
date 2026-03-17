@@ -12,6 +12,7 @@ Microsserviço em Laravel para gerenciamento de pedidos de viagem corporativa.
 - **PHP 8.2** com Apache
 - **Laravel 12.x**
 - **MySQL 8.0**
+- **JWT Auth** (tymon/jwt-auth)
 
 ## Instalação e Execução
 
@@ -46,11 +47,83 @@ docker-compose exec app composer install
 docker-compose exec app php artisan key:generate
 ```
 
-### 6. Execute as migrations
+### 6. Gere a chave JWT
+
+```bash
+docker-compose exec app php artisan jwt:secret
+```
+
+### 7. Execute as migrations
 
 ```bash
 docker-compose exec app php artisan migrate
 ```
+
+## Executar Testes
+
+### Todos os testes
+```bash
+docker-compose exec app php artisan test
+```
+
+### Apenas testes de autenticação
+```bash
+docker-compose exec app php artisan test --filter=AuthTest
+```
+
+### Apenas testes de pedidos de viagem
+```bash
+docker-compose exec app php artisan test --filter=TravelOrderTest
+```
+
+## API Endpoints
+
+### Autenticação
+
+| Método | Endpoint           | Descrição                    | Auth |
+|--------|-------------------|------------------------------|------|
+| POST   | /api/auth/register | Registrar novo usuário       | Não  |
+| POST   | /api/auth/login    | Login (retorna JWT token)    | Não  |
+| POST   | /api/auth/logout   | Logout (invalida token)      | Sim  |
+| POST   | /api/auth/refresh  | Atualizar token              | Sim  |
+| GET    | /api/auth/me       | Perfil do usuário autenticado| Sim  |
+
+### Pedidos de Viagem
+
+| Método | Endpoint                      | Descrição                    | Auth |
+|--------|------------------------------|------------------------------|------|
+| GET    | /api/travel-orders           | Listar pedidos do usuário    | Sim  |
+| POST   | /api/travel-orders           | Criar novo pedido            | Sim  |
+| GET    | /api/travel-orders/{id}      | Visualizar pedido específico | Sim  |
+| PATCH  | /api/travel-orders/{id}/status | Atualizar status (aprovar/cancelar) | Sim |
+| POST   | /api/travel-orders/{id}/cancel | Cancelar pedido             | Sim  |
+
+### Filtros para Listagem
+
+- `status` - Filtrar por status (requested, approved, canceled)
+- `destination` - Filtrar por destino (busca parcial)
+- `start_date` e `end_date` - Filtrar por período de viagem
+- `per_page` - Itens por página (padrão: 15)
+
+Exemplo: `GET /api/travel-orders?status=approved&destination=Paulo&start_date=2026-04-01&end_date=2026-04-30`
+
+## Regras de Negócio
+
+1. **Usuário só vê seus próprios pedidos** - Cada usuário tem acesso apenas aos seus pedidos de viagem
+2. **Usuário não pode aprovar/cancelar seu próprio pedido** - Apenas outros usuários podem alterar o status
+3. **Dono pode cancelar apenas pedidos "solicitados"** - Se o status já for "aprovado", o dono não pode cancelar
+4. **Outros usuários podem cancelar pedidos aprovados** - Administradores/gestores podem cancelar
+5. **Notificações** - O solicitante recebe notificação quando o pedido é aprovado ou cancelado
+
+## Autenticação JWT
+
+Todas as rotas protegidas requerem o header de autorização:
+
+```
+Authorization: Bearer <seu_token_jwt>
+```
+
+O token é retornado após login ou registro e expira após o tempo configurado (padrão: 60 minutos).
 
 ## Acessos
 
@@ -105,23 +178,26 @@ docker-compose up -d --build
 ## Estrutura do Projeto
 
 ```
-├── app/                    # Código da aplicação Laravel
-├── bootstrap/              # Arquivos de inicialização
-├── config/                 # Arquivos de configuração
-├── database/               # Migrations e seeders
+├── app/
+│   ├── Enums/              # Enums (TravelOrderStatus)
+│   ├── Http/
+│   │   ├── Controllers/    # Controllers da API
+│   │   ├── Requests/       # Form Requests (validação)
+│   │   └── Resources/      # API Resources (formatação)
+│   ├── Models/             # Models Eloquent
+│   ├── Notifications/      # Notificações (email/database)
+│   └── Services/           # Services (lógica de negócio)
+├── database/
+│   ├── factories/          # Factories para testes
+│   └── migrations/         # Migrations do banco
 ├── docker/                 # Configurações Docker
-│   ├── apache/             # Configuração do Apache
-│   ├── mysql/              # Scripts de inicialização MySQL
-│   └── php/                # Configurações PHP
-├── public/                 # Arquivos públicos
-├── resources/              # Views e assets
-├── routes/                 # Definição de rotas
-├── storage/                # Arquivos de storage
-├── tests/                  # Testes automatizados
-├── .env                    # Variáveis de ambiente
-├── docker-compose.yml      # Configuração Docker Compose
-├── Dockerfile              # Build da imagem Docker
-└── README.md               # Este arquivo
+├── routes/api.php          # Rotas da API
+├── tests/
+│   ├── Feature/            # Testes de integração
+│   └── Unit/               # Testes unitários
+├── docker-compose.yml
+├── Dockerfile
+└── README.md
 ```
 
 ## Licença
