@@ -79,7 +79,7 @@ jobs:
           DB_DATABASE: travel_orders_test
           DB_USERNAME: root
           DB_PASSWORD: root
-        run: php artisan test --parallel --coverage-text
+        run: php artisan test --coverage-text
 
       - name: Run PHPUnit with coverage report
         env:
