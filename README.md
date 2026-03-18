@@ -59,6 +59,17 @@ docker-compose exec app php artisan jwt:secret
 docker-compose exec app php artisan migrate
 ```
 
+### 8. (Opcional) Popular banco com dados de teste
+
+```bash
+docker-compose exec app php artisan db:seed
+```
+
+Isso criará:
+- **1 usuário admin**: `admin@example.com` / senha: `password`
+- **5 usuários de teste** com pedidos de viagem
+- **30 pedidos de viagem** (6 por usuário: 3 solicitados, 2 aprovados, 1 cancelado)
+
 ## Executar Testes
 
 ### Todos os testes
@@ -75,6 +86,27 @@ docker-compose exec app php artisan test --filter=AuthTest
 ```bash
 docker-compose exec app php artisan test --filter=TravelOrderTest
 ```
+
+## Testando a API com Postman
+
+Uma coleção completa do Postman está disponível em [`postman/Travel_Orders_API.postman_collection.json`](postman/Travel_Orders_API.postman_collection.json).
+
+### Como importar:
+1. Abra o Postman
+2. Clique em **Import** (canto superior esquerdo)
+3. Arraste o arquivo ou clique em **Upload Files**
+4. Selecione o arquivo `postman/Travel_Orders_API.postman_collection.json`
+
+### Recursos da coleção:
+- ✅ **Variáveis automáticas** - Token JWT salvo automaticamente após login/register
+- ✅ **ID do pedido** - Salvo automaticamente após criar um pedido
+- ✅ **Bearer token** - Configurado em todas as rotas protegidas
+- ✅ **Filtros** - Exemplos de todos os filtros disponíveis
+
+### Fluxo de teste sugerido:
+1. **Register** ou **Login** → Token salvo automaticamente
+2. **Criar Pedido** → ID salvo automaticamente
+3. **Listar/Visualizar/Aprovar/Cancelar** → Usa o token e ID salvos
 
 ## API Endpoints
 
