@@ -96,7 +96,7 @@ class TravelOrderTest extends TestCase
             ->getJson('/api/travel-orders');
 
         $response->assertStatus(200)
-            ->assertJsonCount(3, 'data');
+            ->assertJsonCount(3, 'data.data');
     }
 
     public function test_user_can_filter_by_status(): void
@@ -109,7 +109,7 @@ class TravelOrderTest extends TestCase
             ->getJson('/api/travel-orders?status=approved');
 
         $response->assertStatus(200)
-            ->assertJsonCount(1, 'data');
+            ->assertJsonCount(1, 'data.data');
     }
 
     public function test_user_can_filter_by_destination(): void
@@ -127,7 +127,7 @@ class TravelOrderTest extends TestCase
             ->getJson('/api/travel-orders?destination=Paulo');
 
         $response->assertStatus(200)
-            ->assertJsonCount(1, 'data');
+            ->assertJsonCount(1, 'data.data');
     }
 
     public function test_user_can_filter_by_period(): void
@@ -147,7 +147,7 @@ class TravelOrderTest extends TestCase
             ->getJson('/api/travel-orders?start_date=2026-04-01&end_date=2026-04-30');
 
         $response->assertStatus(200)
-            ->assertJsonCount(1, 'data');
+            ->assertJsonCount(1, 'data.data');
     }
 
     // ==================== SHOW ====================
