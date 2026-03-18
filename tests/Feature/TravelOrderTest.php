@@ -304,4 +304,76 @@ class TravelOrderTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+    // ==================== ADMIN ====================
+
+    public function test_admin_can_list_all_travel_orders(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $adminToken = JWTAuth::fromUser($admin);
+
+        TravelOrder::factory()->count(3)->create(['user_id' => $this->user->id]);
+        TravelOrder::factory()->count(2)->create();
+
+        $response = $this->withHeaders(['Authorization' => "Bearer {$adminToken}"])
+            ->getJson('/api/travel-orders');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(5, 'data.data');
+    }
+
+    public function test_admin_can_view_any_travel_order(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $adminToken = JWTAuth::fromUser($admin);
+
+        $order = TravelOrder::factory()->create(['user_id' => $this->user->id]);
+
+        $response = $this->withHeaders(['Authorization' => "Bearer {$adminToken}"])
+            ->getJson("/api/travel-orders/{$order->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.id', $order->id);
+    }
+
+    public function test_admin_can_approve_other_users_order(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->admin()->create();
+        $adminToken = JWTAuth::fromUser($admin);
+
+        $order = TravelOrder::factory()->requested()->create(['user_id' => $this->user->id]);
+
+        $response = $this->withHeaders(['Authorization' => "Bearer {$adminToken}"])
+            ->patchJson("/api/travel-orders/{$order->id}/status", [
+                'status' => 'approved',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.status.value', 'approved');
+
+        $this->assertDatabaseHas('travel_orders', [
+            'id' => $order->id,
+            'status' => TravelOrderStatus::APPROVED->value,
+        ]);
+
+        Notification::assertSentTo($this->user, TravelOrderApprovedNotification::class);
+    }
+
+    public function test_admin_cannot_approve_own_order(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $adminToken = JWTAuth::fromUser($admin);
+
+        $order = TravelOrder::factory()->requested()->create(['user_id' => $admin->id]);
+
+        $response = $this->withHeaders(['Authorization' => "Bearer {$adminToken}"])
+            ->patchJson("/api/travel-orders/{$order->id}/status", [
+                'status' => 'approved',
+            ]);
+
+        $response->assertStatus(403)
+            ->assertJsonPath('success', false);
+    }
 }

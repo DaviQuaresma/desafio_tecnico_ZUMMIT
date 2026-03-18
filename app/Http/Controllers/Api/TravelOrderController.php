@@ -19,8 +19,11 @@ class TravelOrderController extends Controller
 
     public function index(ListTravelOrdersRequest $request): JsonResponse
     {
+        $user = auth()->user();
+
         $result = $this->travelOrderService->list([
-            'user_id' => auth()->id(),
+            'user_id' => $user->id,
+            'is_admin' => $user->isAdmin(),
             'status' => $request->input('status'),
             'destination' => $request->input('destination'),
             'start_date' => $request->input('start_date'),
@@ -52,9 +55,12 @@ class TravelOrderController extends Controller
 
     public function show(int $id): JsonResponse
     {
+        $user = auth()->user();
+
         $travelOrder = $this->travelOrderService->find([
             'id' => $id,
-            'user_id' => auth()->id(),
+            'user_id' => $user->id,
+            'is_admin' => $user->isAdmin(),
         ]);
 
         if (!$travelOrder) {

@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => bcrypt('password'),
+            'is_admin' => true,
         ]);
 
         // Executar seeder de pedidos de viagem
