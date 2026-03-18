@@ -109,11 +109,42 @@ Exemplo: `GET /api/travel-orders?status=approved&destination=Paulo&start_date=20
 
 ## Regras de Negócio
 
-1. **Usuário só vê seus próprios pedidos** - Cada usuário tem acesso apenas aos seus pedidos de viagem
-2. **Usuário não pode aprovar/cancelar seu próprio pedido** - Apenas outros usuários podem alterar o status
-3. **Dono pode cancelar apenas pedidos "solicitados"** - Se o status já for "aprovado", o dono não pode cancelar
-4. **Outros usuários podem cancelar pedidos aprovados** - Administradores/gestores podem cancelar
-5. **Notificações** - O solicitante recebe notificação quando o pedido é aprovado ou cancelado
+1. **Usuário regular só vê seus próprios pedidos** - Cada usuário comum tem acesso apenas aos seus pedidos de viagem
+2. **Admin vê todos os pedidos** - Usuários com `is_admin = true` podem visualizar todos os pedidos de viagem
+3. **Usuário não pode aprovar/cancelar seu próprio pedido** - Apenas outros usuários (ou admin) podem alterar o status
+4. **Dono pode cancelar apenas pedidos "solicitados"** - Se o status já for "aprovado", o dono não pode cancelar
+5. **Outros usuários/admin podem cancelar pedidos aprovados** - Administradores/gestores podem cancelar
+6. **Notificações** - O solicitante recebe notificação quando o pedido é aprovado ou cancelado
+
+## Papel de Administrador
+
+Os usuários podem ter o papel de administrador através do campo `is_admin` na tabela `users`:
+
+- **Usuário regular (`is_admin = false`)**: Vê apenas seus próprios pedidos de viagem
+- **Administrador (`is_admin = true`)**: Vê todos os pedidos de viagem e pode aprová-los/cancelá-los
+
+Para criar um usuário admin via código:
+```php
+User::create([
+    'name' => 'Admin',
+    'email' => 'admin@example.com',
+    'password' => bcrypt('password'),
+    'is_admin' => true,
+]);
+```
+
+## Dados de Teste (Seeder)
+
+Para popular o banco com dados de teste:
+
+```bash
+docker-compose exec app php artisan db:seed
+```
+
+Isso criará:
+- **Usuário Admin**: admin@example.com / password (is_admin = true)
+- **Usuários Regulares**: 5 usuários com e-mails gerados automaticamente e senha padrão `password`
+- **Pedidos de Viagem de Exemplo**: distribuídos entre os usuários
 
 ## Autenticação JWT
 
