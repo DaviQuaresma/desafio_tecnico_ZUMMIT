@@ -142,9 +142,9 @@ docker-compose exec app php artisan db:seed
 ```
 
 Isso criará:
-- **Usuário Admin**: admin@admin.com / password (is_admin = true)
-- **Usuário Regular**: user@user.com / password
-- **10 Pedidos de Viagem**: distribuídos entre os usuários
+- **Usuário Admin**: admin@example.com / password (is_admin = true)
+- **Usuários Regulares**: 5 usuários com e-mails gerados automaticamente e senha padrão `password`
+- **Pedidos de Viagem de Exemplo**: distribuídos entre os usuários
 
 ## Autenticação JWT
 
