@@ -4,11 +4,9 @@ namespace App\Services;
 
 use App\Enums\TravelOrderStatus;
 use App\Models\TravelOrder;
-use App\Models\User;
 use App\Notifications\TravelOrderApprovedNotification;
 use App\Notifications\TravelOrderCanceledNotification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 
 class TravelOrderService
 {
@@ -134,6 +132,12 @@ class TravelOrderService
                     'code' => 403,
                 ];
             }
+        } elseif ($travelOrder->status === TravelOrderStatus::REQUESTED) {
+            return [
+                'success' => false,
+                'message' => 'Somente pedidos aprovados podem ser cancelados por outros usuários.',
+                'code' => 403,
+            ];
         }
 
         if (!$travelOrder->canBeCanceled()) {

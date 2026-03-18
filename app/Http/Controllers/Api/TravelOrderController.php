@@ -17,7 +17,7 @@ class TravelOrderController extends Controller
         private TravelOrderService $travelOrderService
     ) {}
 
-    public function index(ListTravelOrdersRequest $request): TravelOrderCollection
+    public function index(ListTravelOrdersRequest $request): JsonResponse
     {
         $result = $this->travelOrderService->list([
             'user_id' => auth()->id(),
@@ -28,7 +28,10 @@ class TravelOrderController extends Controller
             'per_page' => $request->input('per_page', 15),
         ]);
 
-        return new TravelOrderCollection($result);
+        return response()->json([
+            'success' => true,
+            'data' => new TravelOrderCollection($result),
+        ]);
     }
 
     public function store(StoreTravelOrderRequest $request): JsonResponse

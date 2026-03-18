@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\TravelOrderStatus;
 use App\Models\TravelOrder;
 use App\Models\User;
 use Illuminate\Database\Seeder;

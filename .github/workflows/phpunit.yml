@@ -79,19 +79,7 @@ jobs:
           DB_DATABASE: travel_orders_test
           DB_USERNAME: root
           DB_PASSWORD: root
-        run: php artisan test --coverage-text
-
-      - name: Run PHPUnit with coverage report
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: travel_orders_test
-          DB_USERNAME: root
-          DB_PASSWORD: root
-        run: |
-          php artisan test --coverage-clover=coverage.xml
-        continue-on-error: true
+        run: php artisan test --coverage-text --coverage-clover=coverage.xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
