@@ -8,7 +8,9 @@ docker-compose.yml
 docker-compose.*.yml
 Dockerfile
 .dockerignore
-docker/
+docker/mysql/
+docker/apache/
+docker/php/
 
 # IDE
 .idea
