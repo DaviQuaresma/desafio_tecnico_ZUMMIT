@@ -9,8 +9,16 @@ if [ ! -d "vendor" ]; then
     composer install --no-interaction --prefer-dist --optimize-autoloader
 fi
 
-if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:" ]; then
+APP_KEY_VALUE=$(grep -E "^APP_KEY=" .env 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'")
+if [ -z "$APP_KEY_VALUE" ] || [ "$APP_KEY_VALUE" = "base64:" ]; then
+    echo "Generating APP_KEY..."
     php artisan key:generate --force
+fi
+
+JWT_SECRET_VALUE=$(grep -E "^JWT_SECRET=" .env 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'")
+if [ -z "$JWT_SECRET_VALUE" ]; then
+    echo "Generating JWT_SECRET..."
+    php artisan jwt:secret --force
 fi
 
 php artisan config:clear
