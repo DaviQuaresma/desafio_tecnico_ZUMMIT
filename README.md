@@ -35,31 +35,14 @@ cp .env.example .env
 docker-compose up -d --build
 ```
 
-### 4. Instale as dependências (primeira vez)
+O container instalará automaticamente as dependências, gerará as chaves (APP_KEY e JWT_SECRET) e executará as migrations.
 
-```bash
-docker-compose exec app composer install
-```
+> **Nota:** Aguarde alguns segundos para o setup inicial completar. Acompanhe com:
+> ```bash
+> docker-compose logs -f app
+> ```
 
-### 5. Gere a chave da aplicação
-
-```bash
-docker-compose exec app php artisan key:generate
-```
-
-### 6. Gere a chave JWT
-
-```bash
-docker-compose exec app php artisan jwt:secret
-```
-
-### 7. Execute as migrations
-
-```bash
-docker-compose exec app php artisan migrate
-```
-
-### 8. (Opcional) Popular banco com dados de teste
+### 4. (Opcional) Popular banco com dados de teste
 
 ```bash
 docker-compose exec app php artisan db:seed
