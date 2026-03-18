@@ -13,6 +13,7 @@ class TravelOrderService
     public function list(array $data): LengthAwarePaginator
     {
         $userId = $data['user_id'];
+        $isAdmin = $data['is_admin'] ?? false;
         $status = $data['status'] ?? null;
         $destination = $data['destination'] ?? null;
         $startDate = $data['start_date'] ?? null;
@@ -20,8 +21,11 @@ class TravelOrderService
         $perPage = $data['per_page'] ?? 15;
 
         $query = TravelOrder::query()
-            ->with('user:id,name,email')
-            ->forUser($userId);
+            ->with('user:id,name,email');
+
+        if (!$isAdmin) {
+            $query->forUser($userId);
+        }
 
         if ($status) {
             $query->status($status);
@@ -42,10 +46,15 @@ class TravelOrderService
     {
         $id = $data['id'];
         $userId = $data['user_id'];
+        $isAdmin = $data['is_admin'] ?? false;
 
-        return TravelOrder::with('user:id,name,email')
-            ->forUser($userId)
-            ->find($id);
+        $query = TravelOrder::with('user:id,name,email');
+
+        if (!$isAdmin) {
+            $query->forUser($userId);
+        }
+
+        return $query->find($id);
     }
 
     public function create(array $data): TravelOrder
